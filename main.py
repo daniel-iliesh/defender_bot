@@ -10,8 +10,51 @@ import time
 import math
 import random
 
+
+# Create your objects here.
+ev3 = EV3Brick()
+DistanceSensor = UltrasonicSensor(Port.S1)
+colorSensor = ColorSensor(Port.S2) 
+gyroSensor = GyroSensor(Port.S3)
+# TouchSensor_in_4 = TouchSensor(Port.S4)
+
+#Initialise Motors
+crane_motor_out_b = Motor(Port.B)
+left_motor_out_a = Motor(Port.A, positive_direction=Direction.COUNTERCLOCKWISE)
+right_motor_out_c = Motor(Port.C, positive_direction=Direction.COUNTERCLOCKWISE)
+
+#Initialise DriveBase
+robot = DriveBase(left_motor_out_a, right_motor_out_c, wheel_diameter=31.2, axle_track=178)
+robot.settings(straight_speed = 500, straight_acceleration = 500, turn_rate = 1000, turn_acceleration = 1000)
+
+# Write your program here.
+
+
 # the key is the round number and the value is
 # a list of enemies wich will attack or appear in that round
+
+
+#initialising
+
+bot = Defender()
+soundAttack = bot.SoundAttack()
+touchAttack = bot.TouchAttack()
+craneAttack = bot.CraneAttack()
+
+bot_attacks = [soundAttack, touchAttack, craneAttack ]
+
+bandage = bot.Bandage()
+firstAidKit = bot.FirstAidKit()
+medicalKit = bot.MedicalKit()
+
+bot_heals = [bandage, firstAidKit, medicalKit]
+
+# the key is the slot number and the value is enemy in that slot
+
+total_rounds = 13
+max_angle = 360
+angle_step = 60
+
 enemy_moves = {
     "1": [],
     "2": [],
@@ -20,10 +63,6 @@ enemy_moves = {
     "5": [],
     "6": [],
 }
-
-# the key is the slot number and the value is enemy in that slot
-
-total_rounds = 13
 
 # Classes
 
@@ -405,19 +444,6 @@ def wichTurn(round):
     else:
         return "enemy"
 
-bot = Defender()
-soundAttack = bot.SoundAttack()
-touchAttack = bot.TouchAttack()
-craneAttack = bot.CraneAttack()
-
-bot_attacks = [soundAttack, touchAttack, craneAttack ]
-
-bandage = bot.Bandage()
-firstAidKit = bot.FirstAidKit()
-medicalKit = bot.MedicalKit()
-
-bot_heals = [bandage, firstAidKit, medicalKit]
-
 def Game():
     GenerateMoves()
 
@@ -540,28 +566,6 @@ def Game():
                 time.sleep(2)
                 break
 
-# Create your objects here.
-ev3 = EV3Brick()
-DistanceSensor = UltrasonicSensor(Port.S1)
-colorSensor = ColorSensor(Port.S2) 
-gyroSensor = GyroSensor(Port.S3)
-# TouchSensor_in_4 = TouchSensor(Port.S4)
-
-#Initialise Motors
-crane_motor_out_b = Motor(Port.B)
-left_motor_out_a = Motor(Port.A, positive_direction=Direction.COUNTERCLOCKWISE)
-right_motor_out_c = Motor(Port.C, positive_direction=Direction.COUNTERCLOCKWISE)
-
-#Initialise DriveBase
-robot = DriveBase(left_motor_out_a, right_motor_out_c, wheel_diameter=31.2, axle_track=178)
-robot.settings(straight_speed = 500, straight_acceleration = 500, turn_rate = 1000, turn_acceleration = 1000)
-
-# Write your program here.
-ev3.speaker.beep()
-
-max_angle = 360
-angle_step = 60
-
 def Scan(environment):
     index = 0
 
@@ -624,5 +628,5 @@ def Scan(environment):
     
 
 if __name__ == "__main__" :
+    ev3.speaker.beep()
     Game()
-    # print(bot.getPossibleHeals(bot_heals))
