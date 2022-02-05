@@ -10,51 +10,8 @@ import time
 import math
 import random
 
-
-# Create your objects here.
-ev3 = EV3Brick()
-DistanceSensor = UltrasonicSensor(Port.S1)
-colorSensor = ColorSensor(Port.S2) 
-gyroSensor = GyroSensor(Port.S3)
-# TouchSensor_in_4 = TouchSensor(Port.S4)
-
-#Initialise Motors
-crane_motor_out_b = Motor(Port.B)
-left_motor_out_a = Motor(Port.A, positive_direction=Direction.COUNTERCLOCKWISE)
-right_motor_out_c = Motor(Port.C, positive_direction=Direction.COUNTERCLOCKWISE)
-
-#Initialise DriveBase
-robot = DriveBase(left_motor_out_a, right_motor_out_c, wheel_diameter=31.2, axle_track=178)
-robot.settings(straight_speed = 500, straight_acceleration = 500, turn_rate = 1000, turn_acceleration = 1000)
-
-# Write your program here.
-
-
 # the key is the round number and the value is
 # a list of enemies wich will attack or appear in that round
-
-
-#initialising
-
-bot = Defender()
-soundAttack = bot.SoundAttack()
-touchAttack = bot.TouchAttack()
-craneAttack = bot.CraneAttack()
-
-bot_attacks = [soundAttack, touchAttack, craneAttack ]
-
-bandage = bot.Bandage()
-firstAidKit = bot.FirstAidKit()
-medicalKit = bot.MedicalKit()
-
-bot_heals = [bandage, firstAidKit, medicalKit]
-
-# the key is the slot number and the value is enemy in that slot
-
-total_rounds = 13
-max_angle = 360
-angle_step = 60
-
 enemy_moves = {
     "1": [],
     "2": [],
@@ -63,6 +20,10 @@ enemy_moves = {
     "5": [],
     "6": [],
 }
+
+# the key is the slot number and the value is enemy in that slot
+
+total_rounds = 13
 
 # Classes
 
@@ -233,13 +194,13 @@ class Defender():
             self.consumption = 300
 
         def doAttack(self):
-            robot.straight(-30)
+            robot.straight(-50)
             robot.turn(180)
-            robot.straight(-30)
+            robot.straight(-50)
             crane_motor_out_b.run_target(1000, 360, then = Stop.HOLD, wait=True )
-            robot.straight(30)
+            robot.straight(50)
             robot.turn(-180)
-            robot.straight(30)
+            robot.straight(50)
 
     class TouchAttack(Attack):
         def __init__(self):
@@ -249,11 +210,11 @@ class Defender():
             self.sound = SoundFile.TOUCH
 
         def doAttack(self):
-            robot.straight(-30)
+            robot.straight(-50)
             robot.turn(180)
             robot.straight(-50)
             ev3.speaker.play_file(self.sound)
-            robot.straight(20)
+            robot.straight(50)
             robot.turn(-180)
 
     class SoundAttack(Attack):
@@ -413,16 +374,16 @@ def ThrowDices():
 def GenerateMoves():
     global enemy_moves
 
-    for i in range(1, 7):
-        dices = ThrowDices()
-        enemy_moves.setdefault(str(dices[0]), []).append(dices[1])
+    # for i in range(1, 7):
+    #     dices = ThrowDices()
+    #     enemy_moves.setdefault(str(dices[0]), []).append(dices[1])
     
-    # enemy_moves.setdefault("1", []).append(Tank())
-    # enemy_moves.setdefault("1", []).append(Tank())
-    # enemy_moves.setdefault("4", []).append(Artillery())
-    # enemy_moves.setdefault("4", []).append(Infantry())
-    # enemy_moves.setdefault("6", []).append(Tank())
-    # enemy_moves.setdefault("6", []).append(Infantry())
+    enemy_moves.setdefault("1", []).append(Tank())
+    enemy_moves.setdefault("1", []).append(Artillery())
+    enemy_moves.setdefault("2", []).append(Infantry())
+    enemy_moves.setdefault("4", []).append(Tank())
+    enemy_moves.setdefault("4", []).append(Tank())
+    enemy_moves.setdefault("6", []).append(Infantry())
     
 # asta afiseaza in ce round ce enemy trebuie sa apara
 
@@ -444,8 +405,22 @@ def wichTurn(round):
     else:
         return "enemy"
 
+bot = Defender()
+soundAttack = bot.SoundAttack()
+touchAttack = bot.TouchAttack()
+craneAttack = bot.CraneAttack()
+
+bot_attacks = [soundAttack, touchAttack, craneAttack ]
+
+bandage = bot.Bandage()
+firstAidKit = bot.FirstAidKit()
+medicalKit = bot.MedicalKit()
+
+bot_heals = [bandage, firstAidKit, medicalKit]
+
 def Game():
     GenerateMoves()
+    ShowMoves()
 
     # Bot/attacks/heals initialisation
 
@@ -505,7 +480,6 @@ def Game():
                         if bot.memory[enemy].firstAppearance == False:
                             print("[ENEMY] -- " + bot.memory[enemy].name + " attacked Bot")
                             bot.memory[enemy].Attack(bot)
-                    CheckForWin()
                 print("No enemies appearing in " + str(current_round) + " round")    
                 enemy_round += 1
                 current_round = enemy_round + defender_round
@@ -519,7 +493,6 @@ def Game():
                             if bot.memory[enemy].firstAppearance == False:
                                 print("[ENEMY] -- " + bot.memory[enemy].name + " attacked Bot")
                                 bot.memory[enemy].Attack(bot)
-                        CheckForWin()
                     print("No enemies appearing in " + str(current_round) + " round")    
                     enemy_round += 1
                     current_round = enemy_round + defender_round
@@ -535,7 +508,6 @@ def Game():
                             if bot.memory[enemy].firstAppearance == False:
                                 bot.memory[enemy].Attack(bot)
                                 print("[ENEMY] -- " + bot.memory[enemy].name + " attacked Bot")
-                        CheckForWin()
                     print("In round " + str(current_round) + " added : ")
                     print(env)
                     enemy_round += 1
@@ -547,7 +519,7 @@ def Game():
             defender_round += 1
             print("Defender round : " + str(defender_round))
             bot.recoverEnergy()
-            bot.scanEnv(env)
+            bot.scanEnv(current_round)
             bot.smartMove(bot_attacks, bot_heals)
             
             for slot in bot.memory :
@@ -558,6 +530,8 @@ def Game():
             current_round = enemy_round + defender_round
             
         ev3.speaker.beep()
+        CheckForWin()
+
         
         print("PRESS CENTER BUTTON TO CONTINUE")
         while True:
@@ -565,6 +539,28 @@ def Game():
             if pressed == True:
                 time.sleep(2)
                 break
+
+# Create your objects here.
+ev3 = EV3Brick()
+DistanceSensor = UltrasonicSensor(Port.S1)
+colorSensor = ColorSensor(Port.S2) 
+gyroSensor = GyroSensor(Port.S3)
+# TouchSensor_in_4 = TouchSensor(Port.S4)
+
+#Initialise Motors
+crane_motor_out_b = Motor(Port.B)
+left_motor_out_a = Motor(Port.A, positive_direction=Direction.COUNTERCLOCKWISE)
+right_motor_out_c = Motor(Port.C, positive_direction=Direction.COUNTERCLOCKWISE)
+
+#Initialise DriveBase
+robot = DriveBase(left_motor_out_a, right_motor_out_c, wheel_diameter=31.2, axle_track=178)
+robot.settings(straight_speed = 500, straight_acceleration = 500, turn_rate = 1000, turn_acceleration = 1000)
+
+# Write your program here.
+ev3.speaker.beep()
+
+max_angle = 360
+angle_step = 60
 
 def Scan(environment):
     index = 0
@@ -577,29 +573,27 @@ def Scan(environment):
         "5" : None,
         "6" : None,}
     
-    def memorise(enemy, environment) :
-        enemies[str(index)] = enemy
+    def memorise(angle) :
         if angle == 0 or angle == 360 :
             enemies[str(index)].position = 360
         else :
-            enemies[str(index)].position = angle
-        environment.remove(enemy)
+        enemies[str(index)].position = angle
         print(str(enemies[str(index)].name) + " found at slot " + str(math.trunc((angle/60)+1)) + " ANGLE = " + str(enemies[str(index)].position))
+        ev3.speaker.say(str(enemies[str(index)].name)
     
-    def CheckColor() :
-        for enemy in environment:
-            if (colorSensor.color() == Color.YELLOW or colorSensor.color() == Color.BROWN) and enemy.name == "Tank":
-                memorise(enemy, environment)
-                ev3.speaker.say(enemy.name)
-                break
-            elif colorSensor.color() == Color.RED and enemy.name == "Artillery":
-                memorise(enemy, environment)
-                ev3.speaker.say(enemy.name)
-                break
-            elif (colorSensor.color() == Color.GREEN or colorSensor.color() == Color.BLUE) and enemy.name == "Infantry":
-                memorise(enemy, environment)
-                ev3.speaker.say(enemy.name)
-                break
+    def CheckColor(angle) :
+        if (colorSensor.color() == Color.YELLOW or colorSensor.color() == Color.BROWN):
+            enemies[str(index)] = Tank()
+            memorise(angle)
+            break
+        elif colorSensor.color() == Color.RED :
+            enemies[str(index)] = Artillery()
+            memorise(angle)
+            break
+        elif (colorSensor.color() == Color.GREEN or colorSensor.color() == Color.BLUE) :
+            enemies[str(index)] = Infantry()
+            memorise(angle)
+            break
 
     ev3.speaker.say("Analyze")
     for angle in range(0, max_angle, angle_step):
@@ -608,12 +602,12 @@ def Scan(environment):
             ev3.speaker.say("Detected")
             robot.straight(370)
             if colorSensor.color() != Color.BLACK and colorSensor.color() != None :
-                CheckColor()
+                CheckColor(angle)
             else : 
                 while colorSensor.color() == Color.BLACK or colorSensor.color() == None :
                     robot.straight(-30)
                     robot.straight(30)
-                CheckColor()
+                CheckColor(angle)
             robot.straight(-370)
         
         robot.turn(angle_step)
@@ -628,5 +622,4 @@ def Scan(environment):
     
 
 if __name__ == "__main__" :
-    ev3.speaker.beep()
     Game()
