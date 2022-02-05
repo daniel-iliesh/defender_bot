@@ -502,7 +502,6 @@ def Game():
             
         ev3.speaker.beep()
         CheckForWin()
-
         
         print("PRESS CENTER BUTTON TO CONTINUE")
         while True:
@@ -544,7 +543,7 @@ def Scan():
         "5" : None,
         "6" : None,}
     
-    def memorise(angle) :
+    def memorise() :
         if angle == 0 or angle == 360 :
             enemies[str(index)].position = 360
         else :
@@ -552,7 +551,7 @@ def Scan():
         print(str(enemies[str(index)].name) + " found at slot " + str(math.trunc((angle/60)+1)) + " ANGLE = " + str(enemies[str(index)].position))
         ev3.speaker.say(str(enemies[str(index)].name)
     
-    def CheckColor(angle) :
+    def CheckColor() :
         if (colorSensor.color() == Color.YELLOW or colorSensor.color() == Color.BROWN):
             enemies[str(index)] = Tank()
             memorise(angle)
@@ -573,12 +572,12 @@ def Scan():
             ev3.speaker.say("Detected")
             robot.straight(370)
             if colorSensor.color() != Color.BLACK and colorSensor.color() != None :
-                CheckColor(angle)
+                CheckColor()
             else : 
                 while colorSensor.color() == Color.BLACK or colorSensor.color() == None :
                     robot.straight(-30)
                     robot.straight(30)
-                CheckColor(angle)
+                CheckColor()
             robot.straight(-370)
         
         robot.turn(angle_step)
