@@ -369,17 +369,12 @@ def ThrowDices():
 
 def GenerateMoves():
     global enemy_moves
-
+    
     # for i in range(1, 7):
     #     dices = ThrowDices()
     #     enemy_moves.setdefault(str(dices[0]), []).append(dices[1])
     
-    enemy_moves.setdefault("1", []).append(Tank())
-    enemy_moves.setdefault("1", []).append(Artillery())
-    enemy_moves.setdefault("2", []).append(Infantry())
-    enemy_moves.setdefault("4", []).append(Tank())
-    enemy_moves.setdefault("4", []).append(Tank())
-    enemy_moves.setdefault("6", []).append(Infantry())
+    # enemy_moves.setdefault("1", []).append(Tank())
     
 # displays enemies in all rounds
 
@@ -391,9 +386,8 @@ def ShowMoves():
         else:
             for enemy in enemy_moves[round]:
                 print("\t" + enemy.name)
-        print('\n')
 
-# just checking who belongs this round
+# just checking to who belongs this round
 
 def wichTurn(round):
     if round % 2 == 0:
