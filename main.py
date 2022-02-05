@@ -124,9 +124,9 @@ class Defender():
                 self.memory[enemy] = None
         print("Enemies in defender memory: " + str(self.memory))
                     
-    def scanEnv(self, environment) :
-        enemies = Scan(environment)
-        #adauga in sloturile goale la bot.memory - enemies din search
+    def scanEnv(self) :
+        enemies =Scan()
+        #adds the enemies fouund in search- in bot.memory
         for enemy in enemies :
             for slot in self.memory :
                 if self.memory[slot] == None :
@@ -147,7 +147,7 @@ class Defender():
         print("HP : " + str(self.bot_hp))
         print("ENERGY : " + str(self.bot_energy))
         print("______________________")
-# clasa de attack
+# declaring attack classes
     class Attack():
         name = ''
         damage = 0
@@ -185,7 +185,6 @@ class Defender():
             print("DAMAGE : " + str(self.damage))
             print("CONSUMPTION : " + str(self.consumption))
             print("______________________")
-# aici is attackurile care extind clasa attack
 
     class CraneAttack(Attack):
         def __init__(self):
@@ -226,7 +225,8 @@ class Defender():
 
         def doAttack(self):
             ev3.speaker.play_file(self.sound)
-# asta e lecenia - clasa principala
+
+# main class of healing
 
     class Cure():
         name = ''
@@ -256,7 +256,8 @@ class Defender():
             bot.info()
             self.info()
             
-# asta e bandage tipa cea mai slaba aptecika(am luat conceptul si denumirile de la PUBG :D )
+# i took the naming of the heals from PUBG, where bandage is lower hp recover
+
     class Bandage(Cure):
         def __init__(self):
             self.name = "Bandage"
@@ -277,7 +278,6 @@ class Defender():
             self.recovered_life = 400
             self.consumption = 400
             self.sound = SoundFile.YES
-
 
 class Enemy():
     name = ""
@@ -329,7 +329,6 @@ class Tank(Enemy):
         self.max_hp = 200
         self.impact_attack = math.trunc(self.damage * (self.hp/self.max_hp))
         self.sound = "sounds/tank.wav"
-# clasul la Artilleria care extinde clasul Enemy
 
 class Artillery(Enemy):
     def __init__(self):
@@ -340,7 +339,6 @@ class Artillery(Enemy):
         self.max_hp = 50
         self.impact_attack = math.trunc(self.damage * (self.hp/self.max_hp))
         self.sound = "sounds/art.wav"
-# clasul la soldat care extinde clasul Enemy
 
 class Infantry(Enemy):
     def __init__(self):
@@ -352,7 +350,7 @@ class Infantry(Enemy):
         self.impact_attack = math.trunc(self.damage * (self.hp/self.max_hp))
         self.sound = "sounds/inf.wav"
 
-# asta prosta genereaza numerele - il folosesc in GenerateMoves
+# random dices generator, using in GenerateMoves
 
 def ThrowDices():
     firstDice = random.randint(1, 6)
@@ -369,8 +367,6 @@ def ThrowDices():
 
     return dices
 
-# asta genereaza tabela ceia unde primul zar - e in ce round apare si al doilea zar e cine apare
-
 def GenerateMoves():
     global enemy_moves
 
@@ -385,7 +381,7 @@ def GenerateMoves():
     enemy_moves.setdefault("4", []).append(Tank())
     enemy_moves.setdefault("6", []).append(Infantry())
     
-# asta afiseaza in ce round ce enemy trebuie sa apara
+# displays enemies in all rounds
 
 def ShowMoves():
     for round in enemy_moves:
@@ -397,7 +393,7 @@ def ShowMoves():
                 print("\t" + enemy.name)
         print('\n')
 
-# aici controlez daca e par sau impar numarul ca sa vad a cui e randul
+# just checking who belongs this round
 
 def wichTurn(round):
     if round % 2 == 0:
@@ -430,34 +426,6 @@ def Game():
     defender_round = 0
     current_round = enemy_round + defender_round
 
-    def SayWichRound() :
-        if current_round == 1 :
-            return "1"
-        elif current_round == 2 :
-            return "2"
-        elif current_round == 3 :
-            return "3"
-        elif current_round == 4 :
-            return "4"
-        elif current_round == 5 :
-            return "5"
-        elif current_round == 6 :
-            return "6"
-        elif current_round == 7 :
-            return "7"
-        elif current_round == 8 :
-            return "8"
-        elif current_round == 9 :
-            return "9"
-        elif current_round == 10 :
-            return "10"
-        elif current_round == 11 :
-            return "11"
-        elif current_round == 12 :
-            return "12"
-        elif current_round == 13 :
-            return "13"
-
     def CheckForWin() :
         if bot.bot_hp <= 0 :
             print("############ GAME OVER ############")
@@ -467,10 +435,12 @@ def Game():
             ev3.speaker.play_file("sounds/victory.wav")
     
     # here is the main counter of the game
+
     while current_round <= total_rounds:
         print("_______________________________ROUND " + str(current_round) +  "_______________________________")
-        ev3.speaker.say("Round " + SayWichRound())
-        #check if it's enemy tur
+        ev3.speaker.say("Round " + str(current_round))
+
+        #check if it's enemy turn
         
         if wichTurn(current_round) == "enemy":
             if enemy_round == 7 :
@@ -484,8 +454,9 @@ def Game():
                 enemy_round += 1
                 current_round = enemy_round + defender_round
             else :
-                # ----------------------------------- #
+
                 #checking if array from current enemy_round is empty / if in that round exists some enemies to appear
+
                 if len(enemy_moves[str(enemy_round)]) == 0:
                     print("Enemy round : " + str(enemy_round))
                     for enemy in bot.memory:
@@ -497,8 +468,8 @@ def Game():
                     enemy_round += 1
                     current_round = enemy_round + defender_round
 
-                
-                #if in that array exists enemies then we append those enemies in the environment
+                # if in that array exists enemies then we append those enemies in the environment
+
                 else:
                     print("Enemy round : " + str(enemy_round))
                     for enemy in enemy_moves[str(enemy_round)]:
@@ -513,13 +484,13 @@ def Game():
                     enemy_round += 1
                     current_round = enemy_round + defender_round
 
+        # If it's the robot turn
 
-        #If it's the robot turn
         else:
             defender_round += 1
             print("Defender round : " + str(defender_round))
             bot.recoverEnergy()
-            bot.scanEnv(current_round)
+            bot.scanEnv()
             bot.smartMove(bot_attacks, bot_heals)
             
             for slot in bot.memory :
@@ -562,7 +533,7 @@ ev3.speaker.beep()
 max_angle = 360
 angle_step = 60
 
-def Scan(environment):
+def Scan():
     index = 0
 
     enemies = {
